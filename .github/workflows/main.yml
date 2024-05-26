@@ -27,6 +27,13 @@ jobs:
         run: |
           aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 099289132084.dkr.ecr.us-east-2.amazonaws.com
       
+      - name: Create .env file
+        run: |
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> ./server/.env
+          echo "JWT_REFRESH=${{ secrets.JWT_REFRESH }}" >> ./server/.env
+          echo "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" >> ./server/.env
+          echo "RABBITMQ_URL=${{ secrets.RABBITMQ_URL }}" >> ./server/.env
+
       - name: Build Docker Images
         run: docker-compose build
         

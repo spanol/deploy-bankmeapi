@@ -14,6 +14,7 @@ RUN npm install
 COPY . .
 
 RUN npx prisma migrate dev --name 'initial migration'
+
 RUN npm run seed
 
 # Execute a aplicação
