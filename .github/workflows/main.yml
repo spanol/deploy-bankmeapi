@@ -1,3 +1,46 @@
+# name: Docker Build and Deploy to AWS ECR
+
+# on:
+#   workflow_dispatch:
+#   push:
+#     branches:
+#       - main
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v2
+
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v1
+
+#       - name: Configure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v1
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: us-east-1
+  
+#       - name: Log in to Amazon ECR
+#         run: |
+#           aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/o9t3f8g0
+      
+#       - name: Create .env file
+#         run: |
+#           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> ./server/.env
+#           echo "JWT_REFRESH=${{ secrets.JWT_REFRESH }}" >> ./server/.env
+#           echo "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" >> ./server/.env
+#           echo "RABBITMQ_URL=${{ secrets.RABBITMQ_URL }}" >> ./server/.env
+
+#       - name: Build Docker Images
+#         run: docker-compose build
+        
+#       - name: Push Docker Image to ECR
+#         run: |
+#           docker push public.ecr.aws/o9t3f8g0/challenge-bankme:latest
+
 name: Docker Build and Deploy to AWS ECR
 
 on:
@@ -21,11 +64,11 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-  
+          aws-region: us-east-2
+        
       - name: Log in to Amazon ECR
         run: |
-          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/o9t3f8g0
+          aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 099289132084.dkr.ecr.us-east-2.amazonaws.com
       
       - name: Create .env file
         run: |
@@ -34,9 +77,12 @@ jobs:
           echo "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" >> ./server/.env
           echo "RABBITMQ_URL=${{ secrets.RABBITMQ_URL }}" >> ./server/.env
 
-      - name: Build Docker Images
-        run: docker-compose build
-        
-      - name: Push Docker Image to ECR
+      - name: Build and Tag Docker Images
         run: |
-          docker push public.ecr.aws/o9t3f8g0/challenge-bankme:latest
+          docker build -t 099289132084.dkr.ecr.us-east-2.amazonaws.com/app-back:latest ./server
+          docker build -t 099289132084.dkr.ecr.us-east-2.amazonaws.com/app-front:latest ./client
+        
+      - name: Push Docker Images to ECR
+        run: |
+          docker push 099289132084.dkr.ecr.us-east-2.amazonaws.com/app-back:latest
+          docker push 099289132084.dkr.ecr.us-east-2.amazonaws.com/app-front:latest
