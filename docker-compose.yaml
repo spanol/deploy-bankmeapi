@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: 'rabbitmq'
+    command: rabbitmq-server
+    hostname: rabbitmq
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+      - rabbitmq-log:/var/log/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - rabbitmq-network
+
+  app-back:
+    image: spanol/app-back:latest
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: 'app-back'
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    env_file:
+      - ./server/.env
+    restart: on-failure
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+      - sqlite-data:/app/prisma
+    networks:
+      - rabbitmq-network
+
+  app-front:
+    image: spanol/app-front:latest
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: 'app-front'
+    restart: on-failure
+    ports:
+      - "4200:80"
+    networks:
+      - rabbitmq-network
+
+volumes:
+  sqlite-data:
+  rabbitmq-data:
+  rabbitmq-log:
+
+networks:
+  rabbitmq-network:
