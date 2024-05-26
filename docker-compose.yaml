@@ -21,7 +21,7 @@ services:
       - rabbitmq-network
 
   app-back:
-    image: 099289132084.dkr.ecr.sa-east-1.amazonaws.com/app-back:latest
+    image: 099289132084.dkr.ecr.us-east-2.amazonaws.com/app-back:latest
     build:
       context: ./server
       dockerfile: Dockerfile
@@ -42,7 +42,7 @@ services:
       - rabbitmq-network
 
   app-front:
-    image: 099289132084.dkr.ecr.sa-east-1.amazonaws.com/app-front:latest
+    image: 099289132084.dkr.ecr.us-east-2.amazonaws.com/app-front:latest
     build:
       context: ./client
       dockerfile: Dockerfile
